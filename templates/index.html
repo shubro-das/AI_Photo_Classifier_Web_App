@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attribute Classifier</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5; /* Light gray background */
+        }
+        .header-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); /* Purple-blue gradient */
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.2); /* Semi-transparent white */
+            backdrop-filter: blur(10px); /* Blur effect */
+            -webkit-backdrop-filter: blur(10px); /* Safari support */
+            border: 1px solid rgba(255, 255, 255, 0.3); /* Light border */
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center">
+
+    <!-- Header Section -->
+    <header class="header-bg w-full py-8 shadow-lg rounded-b-lg">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-4xl sm:text-5xl font-bold text-white mb-2 tracking-tight">
+                AI-Powered Multi-Attribute Human Photo Classifier
+            </h1>
+            <p class="text-white text-lg sm:text-xl opacity-90">
+                Instantly analyze and classify human attributes from images
+            </p>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="container mx-auto px-4 py-8 flex flex-col items-center justify-center flex-grow">
+        
+        <!-- Intro Section -->
+        <section class="text-center max-w-3xl mb-12">
+            <h2 class="text-2xl font-semibold text-gray-800 mb-4">Welcome to our AI-powered Image Attribute Classifier!</h2>
+            <p class="text-gray-600 leading-relaxed">
+                Upload an image to get instant predictions on various attributes, including hairstyle, facial expression, and clothing style. Our advanced models provide accurate and insightful classifications, helping you understand visual characteristics quickly and efficiently.
+            </p>
+        </section>
+
+        <!-- Image Upload and Prediction Box -->
+        <section class="bg-white p-8 rounded-xl shadow-2xl w-full max-w-4xl glass-effect border-2 border-purple-300 transform transition-all duration-300 hover:scale-[1.01] hover:shadow-purple-400/50">
+            <h3 class="text-xl font-semibold text-gray-700 mb-6 text-center">Upload Your Image or Try the Demo!</h3>
+            
+                <div id="image-display-box" class="w-full h-80 bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-gray-300 mb-6 relative">
+                    <img id="preview-image" src="https://placehold.co/600x400/999999/FFFFFF?text=Sample+Image+for+Demo" alt="Sample Image" class="max-w-full max-h-full object-contain rounded-lg shadow-md">
+                    <p id="image-placeholder-text" class="absolute text-gray-500 text-lg hidden">Image Preview</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+                    
+                        <label for="image-upload" class="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-105">
+                            <input type="file" id="image-upload" accept="image/*" class="hidden" required>
+                            Upload Image
+                        </label>
+                        <button type="submit" id="predict-button" class="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-full shadow-lg transform transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-75">
+                            Predict Attributes
+                        </button>
+                    
+                </div>
+      
+
+            <!-- Prediction Results Display -->
+            <div id="prediction-results" class="bg-gray-50 p-6 rounded-lg border border-gray-200 shadow-inner min-h-[120px]">
+                <h4 class="text-lg font-medium text-gray-800 mb-3 text-center">Prediction Results:</h4>
+                <div id="results-content" class="text-gray-700 text-base leading-relaxed text-center">
+                    <!-- Results will be displayed here -->
+                    Click "Predict Attributes" to see the magic!
+                </div>
+            </div>
+        </section>
+
+        <!-- Instructions Section -->
+        <section class="max-w-3xl mt-12 text-center bg-yellow-50 border border-yellow-200 p-6 rounded-lg shadow-md">
+            <h3 class="text-xl font-semibold text-yellow-800 mb-4">Important Tip for Best Results:</h3>
+            <p class="text-yellow-700 leading-relaxed">
+                For optimal prediction accuracy, please ensure your uploaded images are **clear enough** and have a **minimum file size of 50KB**. This helps our models process the details effectively.
+            </p>
+        </section>
+
+    </main>
+<script>
+    const imageUpload = document.getElementById('image-upload');
+    const previewImage = document.getElementById('preview-image');
+    const imagePlaceholderText = document.getElementById('image-placeholder-text');
+    const predictButton = document.getElementById('predict-button');
+    const resultsContent = document.getElementById('results-content');
+
+    const demoImageUrl = "https://placehold.co/600x400/999999/FFFFFF?text=Sample+Image+for+Demo";  //  https://images.pexels.com/photos/3460134/pexels-photo-3460134.jpeg
+
+    let currentImageFile = null; // Stores the uploaded file object
+
+    // Function to display results
+    function displayResults(predictions) {
+        let html = '';
+        for (const attribute in predictions) {
+            html += `<p class="mb-1"><strong>${attribute}:</strong> <span class="text-green-600 font-semibold">${predictions[attribute]}</span></p>`;
+        }
+        resultsContent.innerHTML = html;
+    }
+
+    // Event listener for image upload
+    imageUpload.addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        if (file) {
+            // Client-side file size check
+            if (file.size < 50 * 1024) { // 50 KB in bytes
+                resultsContent.innerHTML = '<p class="text-red-500 font-semibold">Error: Image size is less than 50KB. Please upload a larger image for better results.</p>';
+                previewImage.src = demoImageUrl; // Revert to demo image
+                currentImageFile = null; // Important: Clear the file if it's too small
+                imagePlaceholderText.classList.remove('hidden');
+                return;
+            }
+
+            currentImageFile = file; // Store the valid file
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                imagePlaceholderText.classList.add('hidden'); // Hide placeholder text
+                resultsContent.innerHTML = '<p class="text-gray-700 text-base leading-relaxed text-center">Image uploaded! Click "Predict Attributes" to send to server.</p>';
+            };
+            reader.readAsDataURL(file);
+        } else {
+            // If no file is selected (e.g., user cancels file dialog)
+            previewImage.src = demoImageUrl;
+            currentImageFile = null; // Clear the file
+            imagePlaceholderText.classList.remove('hidden');
+            resultsContent.innerHTML = '<p class="text-gray-700 text-base leading-relaxed text-center">Click "Predict Attributes" to see the magic!</p>';
+        }
+    });
+
+    // Event listener for predict button
+    predictButton.addEventListener('click', async function() {
+        resultsContent.innerHTML = '<p class="text-gray-600 text-base leading-relaxed text-center animate-pulse">Predicting attributes...</p>';
+
+        if (!currentImageFile) {
+            // Prevent prediction if no valid image file is currently selected
+            resultsContent.innerHTML = '<p class="text-red-500 font-semibold">Please upload an image first.</p>';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('image', currentImageFile); // 'image' must match Flask's request.files['image']
+
+        try {
+            const response = await fetch('/predict', {
+                method: 'POST', // Ensure this is explicitly POST
+                body: formData  // The FormData object sets the correct Content-Type header
+            });
+
+            const data = await response.json(); // Parse the JSON response
+
+            if (response.ok) { // Check if the HTTP status code is in the 200s
+                displayResults(data);
+            } else {
+                // Display error message from the server
+                resultsContent.innerHTML = `<p class="text-red-500 font-semibold">Error: ${data.error || 'Prediction failed.'}</p>`;
+            }
+        } catch (error) {
+            console.error('Fetch error:', error);
+            resultsContent.innerHTML = '<p class="text-red-500 font-semibold">Network error or server unavailable.</p>';
+        }
+    });
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        previewImage.src = demoImageUrl; // Ensure demo image is loaded
+        resultsContent.innerHTML = '<p class="text-gray-700 text-base leading-relaxed text-center">Upload an image or use the demo!</p>';
+    });
+</script>
+</body>
+</html>
+ 
+
+
+
+
+
+
+
+
+
+
+<!-- <!DOCTYPE html>
+<html>
+<head>
+    <title>AI Photo Classifier</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Upload a Photo</h1>
+        <form method="post" enctype="multipart/form-data">
+            <input type="file" name="image" required>
+            <button type="submit">Predict</button>
+        </form>
+    </div>
+</body>
+</html> -->

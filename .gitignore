@@ -1,0 +1,4 @@
+ai_photo_classifier_web_venv/
+backend/models
+backend/model_files
+uploads/
